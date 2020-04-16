@@ -9,6 +9,8 @@ List files within a running docker container
 To statically compile the program on Linux:
 go build -tags netgo -ldflags '-extldflags "-static" -s -w'
 
+TODO: add trailing slash if entry is a directory
+
 */
 
 package main
