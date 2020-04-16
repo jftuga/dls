@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -27,6 +26,8 @@ import (
 
 func main() {
 	table := tablewriter.NewWriter(os.Stdout)
+	tableErrors := tablewriter.NewWriter(os.Stdout)
+	errorCount := 0
 	err := filepath.Walk(".",
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -42,7 +43,13 @@ func main() {
 			return nil
 		})
 	if err != nil {
-		log.Println(err)
+		tableErrors.Append([]string{fmt.Sprintf("%v", err)})
+		errorCount++
+	}
+
+	if errorCount > 0 {
+		tableErrors.SetHeader([]string{fmt.Sprintf("Errors: %d", errorCount)})
+		tableErrors.Render()
 	}
 
 	table.SetHeader([]string{"Size", "Mod Time", "Name"})
