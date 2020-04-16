@@ -1,13 +1,10 @@
 /*
 
-dls.go
+dls.go - docker ls
 -John Taylor
 Apr-16-2020
 
 List files within a running docker container
-
-Adopted from:
-https://yourbasic.org/golang/list-files-in-directory/
 
 To statically compile the program on Linux:
 go build -tags netgo -ldflags '-extldflags "-static" -s -w'
@@ -17,41 +14,109 @@ go build -tags netgo -ldflags '-extldflags "-static" -s -w'
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 )
 
-func main() {
+const version = "1.0.0"
+
+type stats struct {
+	fileCount int
+	dirCount  int
+	errCount  int
+}
+
+func outputTable(colHeaders []string, tblData [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	tableErrors := tablewriter.NewWriter(os.Stdout)
-	errorCount := 0
-	err := filepath.Walk(".",
+
+	table.SetHeader(colHeaders)
+	table.SetAutoWrapText(false)
+	table.AppendBulk(tblData)
+	table.Render()
+}
+
+func getMetadata(dirName string) ([][]string, [][]string, stats) {
+	var allEntries [][]string
+	var allErrors [][]string
+	errCount := 0
+	fileCount := 0
+	dirCount := 0
+	fileSize := ""
+	modTime := ""
+
+	filepath.Walk(dirName,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				allErrors = append(allErrors, []string{fmt.Sprintf("%v", err)})
+				errCount++
+				return nil
 			}
-			if !info.IsDir() {
-				modTime := fmt.Sprintf("%v", info.ModTime())
-				modTime = modTime[:19]
-				entry := []string{fmt.Sprintf("%9d", info.Size()), modTime, path}
-				table.Append(entry)
+
+			fileSize = fmt.Sprintf("%9d", info.Size())
+			modTime = fmt.Sprintf("%v", info.ModTime())[:19]
+			allEntries = append(allEntries, []string{fileSize, modTime, path})
+			if info.IsDir() {
+				dirCount++
+			} else {
+				fileCount++
 			}
 
 			return nil
 		})
-	if err != nil {
-		tableErrors.Append([]string{fmt.Sprintf("%v", err)})
-		errorCount++
+
+	myStats := new(stats)
+	myStats.fileCount = fileCount
+	myStats.dirCount = dirCount
+	myStats.errCount = errCount
+
+	return allEntries, allErrors, *myStats
+}
+
+func main() {
+
+	argsShowErrors := flag.Bool("e", false, "show file/directory errors")
+	argsVersion := flag.Bool("v", false, "show version and then exit")
+
+	flag.Usage = func() {
+		pgmName := os.Args[0]
+		if strings.HasPrefix(os.Args[0], "./") {
+			pgmName = os.Args[0][2:]
+		}
+		fmt.Fprintf(os.Stderr, "\n%s: Get info for a list of files across multiple directories\n", pgmName)
+		fmt.Fprintf(os.Stderr, "usage: %s [options] [filename|or blank for STDIN]\n", pgmName)
+		fmt.Fprintf(os.Stderr, "       (this file should contain a list of files to process)\n\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\nNotes:\n")
+		fmt.Fprintf(os.Stderr, "  (1) -er precedes -ir\n")
+		fmt.Fprintf(os.Stderr, "  (2) Use '(?i)' at the beginning of a regex to make it case insensitive\n")
+		fmt.Fprintf(os.Stderr, "\n")
 	}
 
-	if errorCount > 0 {
-		tableErrors.SetHeader([]string{fmt.Sprintf("Errors: %d", errorCount)})
-		tableErrors.Render()
+	flag.Parse()
+	if *argsVersion {
+		fmt.Fprintf(os.Stderr, "version %s\n", version)
+		os.Exit(1)
 	}
 
-	table.SetHeader([]string{"Size", "Mod Time", "Name"})
-	table.Render()
+	args := flag.Args()
+	var allEntries, allErrors [][]string
+	var myStats stats
+	if len(args) == 0 {
+		allEntries, allErrors, myStats = getMetadata(".")
+	}
+	//var allFilenames []string
+
+	var colHeader []string
+	if *argsShowErrors && len(allErrors) > 0 {
+		colHeader = []string{fmt.Sprintf("Errors: %d", myStats.errCount)}
+		outputTable(colHeader, allErrors)
+	}
+
+	colHeader = []string{"Size", "Mod Time", fmt.Sprintf("Name: Files:%d Dirs:%d", myStats.fileCount, myStats.dirCount)}
+	outputTable(colHeader, allEntries)
 }
