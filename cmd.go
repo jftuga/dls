@@ -79,6 +79,8 @@ func getMetadata(dirName string) ([][]string, [][]string, stats) {
 
 func main() {
 
+	fmt.Printf("args: %v\n\n", os.Args)
+
 	argsShowErrors := flag.Bool("e", false, "show file/directory errors")
 	argsVersion := flag.Bool("v", false, "show version and then exit")
 
