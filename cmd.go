@@ -154,6 +154,7 @@ func main() {
 	}
 
 	if *argsShowTotal {
+		allEntries = append(allEntries, []string{"---------", "-------------------", "-", "---------------"})
 		allEntries = append(allEntries, []string{"", fmt.Sprintf("%9d", myStats.totalFileSize), "", "(total size)"})
 		var MBytes, GBytes float64 = 0, 0
 		MBytes = float64(myStats.totalFileSize) / (1024 * 1024)
