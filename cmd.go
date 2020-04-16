@@ -87,13 +87,9 @@ func main() {
 		if strings.HasPrefix(os.Args[0], "./") {
 			pgmName = os.Args[0][2:]
 		}
-		fmt.Fprintf(os.Stderr, "\n%s: Get info for a list of files across multiple directories\n", pgmName)
-		fmt.Fprintf(os.Stderr, "usage: %s [options] [filename|or blank for STDIN]\n", pgmName)
-		fmt.Fprintf(os.Stderr, "       (this file should contain a list of files to process)\n\n")
+		fmt.Fprintf(os.Stderr, "\n%s: Get file info for a list of multiple directories\n", pgmName)
+		fmt.Fprintf(os.Stderr, "usage: %s [directory ...]\n", pgmName)
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nNotes:\n")
-		fmt.Fprintf(os.Stderr, "  (1) -er precedes -ir\n")
-		fmt.Fprintf(os.Stderr, "  (2) Use '(?i)' at the beginning of a regex to make it case insensitive\n")
 		fmt.Fprintf(os.Stderr, "\n")
 	}
 
