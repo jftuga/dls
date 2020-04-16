@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -31,6 +30,13 @@ type stats struct {
 	errCount  int
 }
 
+var excludeDirs = map[string]int{
+	"dev":  0,
+	"proc": 0,
+	"sys":  0,
+	".git": 0,
+}
+
 func outputTable(colHeaders []string, tblData [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
 
@@ -40,7 +46,23 @@ func outputTable(colHeaders []string, tblData [][]string) {
 	table.Render()
 }
 
-func getMetadata(dirName string) ([][]string, [][]string, stats) {
+func matchesExclude(entry string) bool {
+	prefix := ""
+	for key, _ := range excludeDirs {
+
+		max := len(key)
+		if max > len(entry) {
+			max = len(entry)
+		}
+		prefix = entry[:max]
+		if key == prefix {
+			return true
+		}
+	}
+	return false
+}
+
+func getMetadata(dirName string, showAll bool) ([][]string, [][]string, stats) {
 	var allEntries [][]string
 	var allErrors [][]string
 	errCount := 0
@@ -51,6 +73,9 @@ func getMetadata(dirName string) ([][]string, [][]string, stats) {
 
 	filepath.Walk(dirName,
 		func(path string, info os.FileInfo, err error) error {
+			if !showAll && (matchesExclude(path) || "." == path) {
+				return nil
+			}
 			if err != nil {
 				allErrors = append(allErrors, []string{fmt.Sprintf("%v", err)})
 				errCount++
@@ -59,12 +84,14 @@ func getMetadata(dirName string) ([][]string, [][]string, stats) {
 
 			fileSize = fmt.Sprintf("%9d", info.Size())
 			modTime = fmt.Sprintf("%v", info.ModTime())[:19]
-			allEntries = append(allEntries, []string{fileSize, modTime, path})
+			objType := "F"
 			if info.IsDir() {
+				objType = "D"
 				dirCount++
 			} else {
 				fileCount++
 			}
+			allEntries = append(allEntries, []string{fileSize, modTime, objType, path})
 
 			return nil
 		})
@@ -78,33 +105,18 @@ func getMetadata(dirName string) ([][]string, [][]string, stats) {
 }
 
 func main() {
+	argsShowAll := flag.Bool("a", false, "show all files, including .git, dev, proc, and sys")
 	argsShowErrors := flag.Bool("e", false, "show file/directory errors")
 	argsVersion := flag.Bool("v", false, "show version and then exit")
-
-	flag.Usage = func() {
-		pgmName := os.Args[0]
-		if strings.HasPrefix(os.Args[0], "./") {
-			pgmName = os.Args[0][2:]
-		}
-		fmt.Fprintf(os.Stderr, "\n%s: Get file info for a list of multiple directories\n", pgmName)
-		fmt.Fprintf(os.Stderr, "usage: %s [directory ...]\n", pgmName)
-		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\n")
-	}
-
 	flag.Parse()
 	if *argsVersion {
 		fmt.Fprintf(os.Stderr, "version %s\n", version)
 		os.Exit(1)
 	}
 
-	args := flag.Args()
 	var allEntries, allErrors [][]string
 	var myStats stats
-	if len(args) == 0 {
-		allEntries, allErrors, myStats = getMetadata(".")
-	}
-	//var allFilenames []string
+	allEntries, allErrors, myStats = getMetadata(".", *argsShowAll)
 
 	var colHeader []string
 	if *argsShowErrors && len(allErrors) > 0 {
@@ -112,6 +124,6 @@ func main() {
 		outputTable(colHeader, allErrors)
 	}
 
-	colHeader = []string{"Size", "Mod Time", fmt.Sprintf("Name: Files:%d Dirs:%d", myStats.fileCount, myStats.dirCount)}
+	colHeader = []string{"Size", "Mod Time", "Type", fmt.Sprintf("Name (Files:%d Dirs:%d)", myStats.fileCount, myStats.dirCount)}
 	outputTable(colHeader, allEntries)
 }
