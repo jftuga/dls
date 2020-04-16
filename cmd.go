@@ -9,8 +9,6 @@ List files within a running docker container
 To statically compile the program on Linux:
 go build -tags netgo -ldflags '-extldflags "-static" -s -w'
 
-TODO: add trailing slash if entry is a directory
-
 */
 
 package main
@@ -90,6 +88,7 @@ func getMetadata(dirName string, showAll bool) ([][]string, [][]string, stats) {
 			modTime = fmt.Sprintf("%v", info.ModTime())[:19]
 			objType := "F"
 			if info.IsDir() {
+				path += string(os.PathSeparator)
 				objType = "D"
 				dirCount++
 			} else {
