@@ -67,3 +67,5 @@ Current directory is the default if no other directory is given on cmd-line
 * Remember to create a static version of the binary
 * `dls` can be started from the [Docker Scratch Image](https://hub.docker.com/_/scratch)
 
+### References
+* [Building Minimal Docker Containers for Go Applications](https://rollout.io/blog/building-minimal-docker-containers-for-go-applications/)
