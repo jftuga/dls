@@ -19,6 +19,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -51,7 +52,7 @@ func outputTable(colHeaders []string, tblData [][]string) {
 
 func matchesExclude(entry string) bool {
 	prefix := ""
-	for key, _ := range excludeDirs {
+	for key := range excludeDirs {
 
 		max := len(key)
 		if max > len(entry) {
@@ -125,8 +126,12 @@ func main() {
 	}
 	flag.Parse()
 	if *argsVersion {
-		fmt.Fprintf(os.Stderr, "version %s\n", version)
+		fmt.Fprintf(os.Stderr, "gofwd, version %s\n", version)
+		if "windows" == runtime.GOOS {
+			fmt.Fprintf(os.Stderr, "OS build: %s\n", getOSVersion())
+		}
 		os.Exit(1)
+
 	}
 
 	var allEntries, allErrors [][]string
