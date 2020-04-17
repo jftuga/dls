@@ -1,7 +1,7 @@
 # dls
 docker ls - list files within a container
 
-This is used to view what files and directories are inside of a running docker container.  In your `Dockerfile`,
+This program is used to view what files and directories are inside of a running docker container.  In your `Dockerfile`,
 you will need to `ADD` or `COPY` a **statically linked** `dls` binary.
 
 ## Usage
@@ -57,10 +57,13 @@ Current directory is the default if no other directory is given on cmd-line
 
 **NOTE:** *I have not been able to test all of these*
 
-
 ### Windows
-* You will need to use `nanoserver` with a matching OS version
-* * `dls -v` will return your specific `OS build`
+* You will need to use `nanoserver` with a matching OS version: [Docker Image List](https://hub.docker.com/_/microsoft-windows-nanoserver)
+* * Running `dls -v` will return your specific `OS build`
+* Example for Windows 10 LTSC Build 1809:
+* * `docker pull mcr.microsoft.com/windows/nanoserver:10.0.17763.1158`
 
 ### Linux
 * Remember to create a static version of the binary
+* `dls` can be started from the [Docker Scratch Image](https://hub.docker.com/_/scratch)
+
