@@ -69,3 +69,5 @@ Current directory is the default if no other directory is given on cmd-line
 
 ### References
 * [Building Minimal Docker Containers for Go Applications](https://rollout.io/blog/building-minimal-docker-containers-for-go-applications/)
+* ["Distroless" Docker Images](https://github.com/GoogleContainerTools/distroless)
+* [Statically compiling Go programs](https://www.arp242.net/static-go.html)
