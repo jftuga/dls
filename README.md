@@ -1,8 +1,14 @@
 # dls
 docker ls - list files within a container
 
-This program is used to view what files and directories are inside of a running docker container.  In your `Dockerfile`,
-you will need to `ADD` or `COPY` a **statically linked** `dls` binary.
+## Description
+
+This program is used to view what files and directories reside inside a running docker container.  This program is most useful when using the
+[Scratch](https://hub.docker.com/_/scratch) docker image or when `ls` is not provided.
+It is also helpful when using an image / container that you are not familiar with.
+
+In your `Dockerfile`,
+you will need to `ADD` or `COPY` a **statically linked** `dls` binary *(see below)*.
 
 ## Usage
 
