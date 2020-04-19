@@ -25,7 +25,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-const version = "1.0.0"
+const version = "1.1.0"
 
 type stats struct {
 	fileCount     int
@@ -48,6 +48,12 @@ func outputTable(colHeaders []string, tblData [][]string) {
 	table.SetAutoWrapText(false)
 	table.AppendBulk(tblData)
 	table.Render()
+}
+
+func outputBare(tblData [][]string) {
+	for _, entry := range tblData {
+		fmt.Println(entry[3])
+	}
 }
 
 func matchesExclude(entry string) bool {
@@ -111,9 +117,11 @@ func getMetadata(dirName string, showAll bool) ([][]string, [][]string, stats) {
 
 func main() {
 	argsShowAll := flag.Bool("a", false, "show all files, including .git, dev, proc, and sys")
+	argsBare := flag.Bool("b", false, "show in bare format, eg: no tables")
 	argsShowErrors := flag.Bool("e", false, "show file/directory errors")
 	argsVersion := flag.Bool("v", false, "show version and then exit")
 	argsShowTotal := flag.Bool("t", false, "show total file size of all files")
+
 	flag.Usage = func() {
 		pgmName := os.Args[0]
 		if strings.HasPrefix(os.Args[0], "./") {
@@ -171,6 +179,11 @@ func main() {
 			allEntries = append(allEntries, []string{"", fmt.Sprintf("%9.2f", GBytes), "", "(GB total size)"})
 		}
 	}
-	colHeader = []string{"Size", "Mod Time", "Type", fmt.Sprintf("Name (Files:%d Dirs:%d)", myStats.fileCount, myStats.dirCount)}
-	outputTable(colHeader, allEntries)
+
+	if *argsBare {
+		outputBare(allEntries)
+	} else {
+		colHeader = []string{"Size", "Mod Time", "Type", fmt.Sprintf("Name (Files:%d Dirs:%d)", myStats.fileCount, myStats.dirCount)}
+		outputTable(colHeader, allEntries)
+	}
 }

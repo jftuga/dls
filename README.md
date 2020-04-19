@@ -10,6 +10,7 @@ you will need to `ADD` or `COPY` a **statically linked** `dls` binary.
 dls: Get file info for a directory
 usage: dls [directory]
   -a	show all files, including .git, dev, proc, and sys
+  -b	show in bare format, eg: no tables
   -e	show file/directory errors
   -t	show total file size of all files
   -v	show version and then exit
