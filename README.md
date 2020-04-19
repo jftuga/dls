@@ -50,7 +50,7 @@ Current directory is the default if no other directory is given on cmd-line
 
 | Platform | Command
 ----------|-----
-| windows | go build -tags netgo -ldflags "-H=windowsgui -extldflags -static"
+| windows | go build -tags netgo -ldflags "-extldflags -static"
 | linux/bsd | go build -tags netgo -ldflags '-extldflags "-static" -s -w'
 | macos | go build -ldflags '-s -extldflags "-sectcreate __TEXT __info_plist Info.plist"'
 | android | go build -ldflags -s
