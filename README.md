@@ -51,6 +51,25 @@ Current directory is the default if no other directory is given on cmd-line
 +-----------+---------------------+------+------------------------+
 ```
 
+* dls.exe -b
+
+```
+LICENSE
+README.md
+cmd.go
+dls.exe
+osver_darwin.go
+osver_freebsd.go
+osver_linux.go
+osver_windows.go
+test1\
+test1\file1.txt
+test1\file2.txt
+test2\
+test2\file3.txt
+```
+
+
 ## Docker
 
 ### Static Binary Complication
